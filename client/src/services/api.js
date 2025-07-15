@@ -47,7 +47,7 @@ export const urlService = {
 
   getStats: async (shortCode) => {
     try {
-      const response = await api.get(`/shorten/${shortCode}/stats`)
+      const response = await api.get(`/shorten/statistics/${shortCode}`)
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Failed to get stats')

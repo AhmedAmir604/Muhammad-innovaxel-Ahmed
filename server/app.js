@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
       'GET /api/shorten/:shortCode': 'Get original URL',
       'PUT /api/shorten/:shortCode': 'Update URL',
       'DELETE /api/shorten/:shortCode': 'Delete URL',
-      'GET /api/shorten/:shortCode/stats': 'Get URL statistics'
+      'GET /api/shorten/statistics/:shortCode': 'Get URL statistics'
     }
   });
 });

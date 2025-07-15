@@ -6,6 +6,13 @@ const createShortUrl = async (req, res) => {
   try {
     const { url } = req.body;
 
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'URL is required and must be a valid string'
+      });
+    }
+
     const existingUrl = await Url.findOne({ url });
 
     if (existingUrl) {
@@ -82,6 +89,13 @@ const updateUrl = async (req, res) => {
   try {
     const { shortCode } = req.params;
     const { url } = req.body;
+
+    if (!url || typeof url !== 'string' || url.trim() === '') {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: 'URL is required and must be a valid string'
+      });
+    }
 
     const updatedUrl = await Url.findOneAndUpdate(
       { shortCode },

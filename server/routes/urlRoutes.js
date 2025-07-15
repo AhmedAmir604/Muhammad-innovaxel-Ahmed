@@ -20,7 +20,7 @@ router.put('/shorten/:shortCode', updateUrl);
 // DELETE /shorten/:shortCode - Delete URL
 router.delete('/shorten/:shortCode', deleteUrl);
 
-// GET /shorten/:shortCode/stats - Get URL statistics
-router.get('/shorten/:shortCode/stats', getUrlStats);
+// GET /shorten/statistics/:shortCode - Get URL statistics
+router.get('/shorten/statistics/:shortCode', getUrlStats);
 
 module.exports = router; 
