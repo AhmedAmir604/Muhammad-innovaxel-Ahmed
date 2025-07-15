@@ -19,6 +19,16 @@ const UrlShortener = () => {
   const [updateResult, setUpdateResult] = useState(null)
   const [updateError, setUpdateError] = useState('')
 
+  const [deleteShortCode, setDeleteShortCode] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteResult, setDeleteResult] = useState(null)
+  const [deleteError, setDeleteError] = useState('')
+
+  const [statsShortCode, setStatsShortCode] = useState('')
+  const [isGettingStats, setIsGettingStats] = useState(false)
+  const [statsResult, setStatsResult] = useState(null)
+  const [statsError, setStatsError] = useState('')
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -96,6 +106,52 @@ const UrlShortener = () => {
     }
   }
 
+  const handleDeleteUrl = async (e) => {
+    e.preventDefault()
+    setDeleteError('')
+    
+    if (!deleteShortCode.trim()) {
+      setDeleteError('Please enter a short code')
+      return
+    }
+
+    setIsDeleting(true)
+    
+    try {
+      await urlService.deleteUrl(deleteShortCode.trim())
+      setDeleteResult({ shortCode: deleteShortCode.trim() })
+      setDeleteShortCode('')
+    } catch (error) {
+      setDeleteError(error.message)
+      setDeleteResult(null)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const handleGetStats = async (e) => {
+    e.preventDefault()
+    setStatsError('')
+    
+    if (!statsShortCode.trim()) {
+      setStatsError('Please enter a short code')
+      return
+    }
+
+    setIsGettingStats(true)
+    
+    try {
+      const response = await urlService.getStats(statsShortCode.trim())
+      setStatsResult(response)
+      setStatsShortCode('')
+    } catch (error) {
+      setStatsError(error.message)
+      setStatsResult(null)
+    } finally {
+      setIsGettingStats(false)
+    }
+  }
+
   const handleReset = () => {
     setResult(null)
     setError('')
@@ -113,6 +169,18 @@ const UrlShortener = () => {
     setUpdateError('')
     setUpdateShortCode('')
     setUpdateUrl('')
+  }
+
+  const handleDeleteReset = () => {
+    setDeleteResult(null)
+    setDeleteError('')
+    setDeleteShortCode('')
+  }
+
+  const handleStatsReset = () => {
+    setStatsResult(null)
+    setStatsError('')
+    setStatsShortCode('')
   }
 
   return (
@@ -155,7 +223,6 @@ const UrlShortener = () => {
           </button>
         </form>
 
-        {/* Result Display */}
         {result && (
           <div className="mt-8 p-6 bg-gray-700 rounded-xl border border-gray-600">
             <div className="flex items-center justify-between mb-4">
@@ -263,7 +330,6 @@ const UrlShortener = () => {
         )}
       </div>
 
-      {/* Update URL Section */}
       <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
         <h2 className="text-xl font-semibold text-white mb-6">Update URL</h2>
         <form onSubmit={handleUpdateUrl} className="space-y-6">
@@ -303,7 +369,7 @@ const UrlShortener = () => {
               <div className="flex items-center justify-center space-x-2">
                 <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 714 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <span>Updating...</span>
               </div>
@@ -339,6 +405,135 @@ const UrlShortener = () => {
               <div className="pt-2 text-xs text-gray-500">
                 Originally created: {new Date(updateResult.createdAt).toLocaleString()} | 
                 Last updated: {new Date(updateResult.updatedAt).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+        <h2 className="text-xl font-semibold text-white mb-6">Delete URL</h2>
+        <form onSubmit={handleDeleteUrl} className="space-y-6">
+          <div>
+            <input
+              type="text"
+              value={deleteShortCode}
+              onChange={(e) => setDeleteShortCode(e.target.value)}
+              placeholder="Enter short code to delete"
+              className="w-full px-6 py-4 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all text-lg"
+              required
+              disabled={isDeleting}
+            />
+            {deleteError && (
+              <p className="mt-2 text-red-400 text-sm">{deleteError}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={!deleteShortCode || isDeleting}
+            className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200"
+          >
+            {isDeleting ? (
+              <div className="flex items-center justify-center space-x-2">
+                <span>Deleting...</span>
+              </div>
+            ) : (
+              <span>Delete URL</span>
+            )}
+          </button>
+        </form>
+
+        {deleteResult && (
+          <div className="mt-8 p-6 bg-gray-700 rounded-xl border border-gray-600">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">URL Deleted</h3>
+              <button
+                onClick={handleDeleteReset}
+                className="text-gray-400 hover:text-white text-sm"
+              >
+                Clear
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Deleted Short Code</label>
+                <p className="text-red-400 font-mono text-sm">{deleteResult.shortCode}</p>
+              </div>
+              
+              <div className="pt-2 text-xs text-gray-500">
+                URL successfully deleted
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+        <h2 className="text-xl font-semibold text-white mb-6">Get Statistics</h2>
+        <form onSubmit={handleGetStats} className="space-y-6">
+          <div>
+            <input
+              type="text"
+              value={statsShortCode}
+              onChange={(e) => setStatsShortCode(e.target.value)}
+              placeholder="Enter short code for stats"
+              className="w-full px-6 py-4 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-lg"
+              required
+              disabled={isGettingStats}
+            />
+            {statsError && (
+              <p className="mt-2 text-red-400 text-sm">{statsError}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={!statsShortCode || isGettingStats}
+            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200"
+          >
+            {isGettingStats ? (
+              <div className="flex items-center justify-center space-x-2">
+                <span>Getting Stats...</span>
+              </div>
+            ) : (
+              <span>Get Statistics</span>
+            )}
+          </button>
+        </form>
+
+        {statsResult && (
+          <div className="mt-8 p-6 bg-gray-700 rounded-xl border border-gray-600">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">URL Statistics</h3>
+              <button
+                onClick={handleStatsReset}
+                className="text-gray-400 hover:text-white text-sm"
+              >
+                Clear
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Original URL</label>
+                <p className="text-gray-300 text-sm break-all">{statsResult.url}</p>
+              </div>
+              
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Short Code</label>
+                <p className="text-purple-400 font-mono text-sm">{statsResult.shortCode}</p>
+              </div>
+
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Total Clicks</label>
+                <p className="text-purple-300 text-2xl font-bold">{statsResult.accessCount}</p>
+              </div>
+              
+              <div className="pt-2 text-xs text-gray-500">
+                Created: {new Date(statsResult.createdAt).toLocaleString()} | 
+                Last accessed: {new Date(statsResult.updatedAt).toLocaleString()}
               </div>
             </div>
           </div>

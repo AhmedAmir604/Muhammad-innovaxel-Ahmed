@@ -9,7 +9,6 @@ const api = axios.create({
 })
 
 export const urlService = {
-  // Shorten a URL
   shortenUrl: async (url) => {
     try {
       const response = await api.post('/shorten', { url })
@@ -19,7 +18,6 @@ export const urlService = {
     }
   },
 
-  // Get original URL by short code
   getUrl: async (shortCode) => {
     try {
       const response = await api.get(`/shorten/${shortCode}`)
@@ -29,13 +27,30 @@ export const urlService = {
     }
   },
 
-  // Update URL
   updateUrl: async (shortCode, newUrl) => {
     try {
       const response = await api.put(`/shorten/${shortCode}`, { url: newUrl })
       return response.data
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Failed to update URL')
+    }
+  },
+
+  deleteUrl: async (shortCode) => {
+    try {
+      await api.delete(`/shorten/${shortCode}`)
+      return { success: true }
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to delete URL')
+    }
+  },
+
+  getStats: async (shortCode) => {
+    try {
+      const response = await api.get(`/shorten/${shortCode}/stats`)
+      return response.data
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Failed to get stats')
     }
   }
 }
