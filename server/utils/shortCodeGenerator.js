@@ -10,7 +10,6 @@ const generateShortCode = (length = 6) => {
   return result;
 };
 
-// Generate unique short code (checks for duplicates)
 const generateUniqueShortCode = async (length = 6) => {
   let shortCode;
   let isUnique = false;
@@ -25,7 +24,6 @@ const generateUniqueShortCode = async (length = 6) => {
       isUnique = true;
     } else {
       attempts++;
-      // Increase length if too many collisions
       if (attempts >= maxAttempts) {
         return generateUniqueShortCode(length + 1);
       }

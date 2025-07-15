@@ -6,8 +6,8 @@ const createShortUrl = async (req, res) => {
   try {
     const { url } = req.body;
 
-    // Check if URL already exists
     const existingUrl = await Url.findOne({ url });
+
     if (existingUrl) {
       return res.status(200).json({
         id: existingUrl._id,
@@ -18,10 +18,8 @@ const createShortUrl = async (req, res) => {
       });
     }
 
-    // Generate unique short code
     const shortCode = await generateUniqueShortCode();
 
-    // Create new URL
     const newUrl = new Url({
       url,
       shortCode
@@ -36,6 +34,7 @@ const createShortUrl = async (req, res) => {
       createdAt: newUrl.createdAt,
       updatedAt: newUrl.updatedAt
     });
+    console.log(newUrl, "newurl")
   } catch (error) {
     console.error('Error creating short URL:', error);
     res.status(500).json({ 
@@ -45,7 +44,6 @@ const createShortUrl = async (req, res) => {
   }
 };
 
-// Get original URL by short code
 const getOriginalUrl = async (req, res) => {
   try {
     const { shortCode } = req.params;
@@ -80,7 +78,6 @@ const getOriginalUrl = async (req, res) => {
   }
 };
 
-// Update URL
 const updateUrl = async (req, res) => {
   try {
     const { shortCode } = req.params;
@@ -115,7 +112,6 @@ const updateUrl = async (req, res) => {
   }
 };
 
-// Delete URL
 const deleteUrl = async (req, res) => {
   try {
     const { shortCode } = req.params;
@@ -139,7 +135,6 @@ const deleteUrl = async (req, res) => {
   }
 };
 
-// Get URL statistics
 const getUrlStats = async (req, res) => {
   try {
     const { shortCode } = req.params;
