@@ -8,11 +8,16 @@ const UrlShortener = () => {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   
-  // New state for testing getUrl
   const [shortCode, setShortCode] = useState('')
   const [isGetting, setIsGetting] = useState(false)
   const [getResult, setGetResult] = useState(null)
   const [getError, setGetError] = useState('')
+
+  const [updateShortCode, setUpdateShortCode] = useState('')
+  const [updateUrl, setUpdateUrl] = useState('')
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [updateResult, setUpdateResult] = useState(null)
+  const [updateError, setUpdateError] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -39,7 +44,6 @@ const UrlShortener = () => {
     }
   }
 
-  // New function to test getUrl
   const handleGetUrl = async (e) => {
     e.preventDefault()
     setGetError('')
@@ -63,6 +67,35 @@ const UrlShortener = () => {
     }
   }
 
+  const handleUpdateUrl = async (e) => {
+    e.preventDefault()
+    setUpdateError('')
+    
+    if (!updateShortCode.trim()) {
+      setUpdateError('Please enter a short code')
+      return
+    }
+
+    if (!isValidUrl(updateUrl)) {
+      setUpdateError('Please enter a valid URL (starting with http:// or https://)')
+      return
+    }
+
+    setIsUpdating(true)
+    
+    try {
+      const response = await urlService.updateUrl(updateShortCode.trim(), updateUrl)
+      setUpdateResult(response)
+      setUpdateShortCode('')
+      setUpdateUrl('')
+    } catch (error) {
+      setUpdateError(error.message)
+      setUpdateResult(null)
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
   const handleReset = () => {
     setResult(null)
     setError('')
@@ -75,9 +108,16 @@ const UrlShortener = () => {
     setShortCode('')
   }
 
+  const handleUpdateReset = () => {
+    setUpdateResult(null)
+    setUpdateError('')
+    setUpdateShortCode('')
+    setUpdateUrl('')
+  }
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
-      {/* URL Shortener Section */}
+
       <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
         <h2 className="text-xl font-semibold text-white mb-6">Create Short URL</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -217,6 +257,88 @@ const UrlShortener = () => {
               <div className="pt-2 text-xs text-gray-500">
                 Created: {new Date(getResult.createdAt).toLocaleString()} | 
                 Last accessed: {new Date(getResult.updatedAt).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Update URL Section */}
+      <div className="bg-gray-800 rounded-2xl p-8 border border-gray-700">
+        <h2 className="text-xl font-semibold text-white mb-6">Update URL</h2>
+        <form onSubmit={handleUpdateUrl} className="space-y-6">
+          <div>
+            <input
+              type="text"
+              value={updateShortCode}
+              onChange={(e) => setUpdateShortCode(e.target.value)}
+              placeholder="Enter short code to update"
+              className="w-full px-6 py-4 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+              required
+              disabled={isUpdating}
+            />
+          </div>
+          
+          <div>
+            <input
+              type="url"
+              value={updateUrl}
+              onChange={(e) => setUpdateUrl(e.target.value)}
+              placeholder="Enter new URL"
+              className="w-full px-6 py-4 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-lg"
+              required
+              disabled={isUpdating}
+            />
+            {updateError && (
+              <p className="mt-2 text-red-400 text-sm">{updateError}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={!updateShortCode || !updateUrl || isUpdating}
+            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200"
+          >
+            {isUpdating ? (
+              <div className="flex items-center justify-center space-x-2">
+                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Updating...</span>
+              </div>
+            ) : (
+              <span>Update URL</span>
+            )}
+          </button>
+        </form>
+
+        {updateResult && (
+          <div className="mt-8 p-6 bg-gray-700 rounded-xl border border-gray-600">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Updated URL</h3>
+              <button
+                onClick={handleUpdateReset}
+                className="text-gray-400 hover:text-white text-sm"
+              >
+                Clear
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Updated URL</label>
+                <p className="text-gray-300 text-sm break-all">{updateResult.url}</p>
+              </div>
+              
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Short Code</label>
+                <p className="text-green-400 font-mono text-sm">{updateResult.shortCode}</p>
+              </div>
+              
+              <div className="pt-2 text-xs text-gray-500">
+                Originally created: {new Date(updateResult.createdAt).toLocaleString()} | 
+                Last updated: {new Date(updateResult.updatedAt).toLocaleString()}
               </div>
             </div>
           </div>
