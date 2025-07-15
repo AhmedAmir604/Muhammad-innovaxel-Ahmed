@@ -1,11 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { urlService } from '../../services/api'
+
 
 const GetTab = () => {
   const [shortCode, setShortCode] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [autoRedirect, setAutoRedirect] = useState(true)
+  const redirectTimeoutRef = useRef(null)
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current)
+      }
+    }
+  },[])
+
+  const handleRedirect = (url) => {
+    const formattedUrl = url.startsWith('http://') || url.startsWith('https://') 
+      ? url 
+      : `https://${url}`
+    
+    window.open(formattedUrl, '_blank', 'noopener,noreferrer')
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -22,6 +41,11 @@ const GetTab = () => {
       const response = await urlService.getUrl(shortCode.trim())
       setResult(response)
       setShortCode('')
+      if (autoRedirect) {
+        redirectTimeoutRef.current = setTimeout(() => {
+          handleRedirect(response.url)
+        }, 1500)
+      }
     } catch (error) {
       setError(error.message)
       setResult(null)
@@ -53,6 +77,25 @@ const GetTab = () => {
             <p className="mt-2 text-red-400 text-sm">{error}</p>
           )}
         </div>
+        
+        <div className="flex items-center justify-start pt-2">
+          <label htmlFor="auto-redirect-checkbox" className="flex items-center cursor-pointer">
+            <div className="relative">
+              <input
+                id="auto-redirect-checkbox"
+                type="checkbox"
+                className="sr-only"
+                checked={autoRedirect}
+                onChange={() => setAutoRedirect(!autoRedirect)}
+              />
+              <div className={`block w-10 h-6 rounded-full transition-colors ${autoRedirect ? 'bg-blue-600' : 'bg-gray-600'}`}></div>
+              <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${autoRedirect ? 'transform translate-x-full' : ''}`}></div>
+            </div>
+            <div className="ml-3 text-gray-300 text-sm font-medium">
+              Auto-redirect on success
+            </div>
+          </label>
+        </div>
 
         <button
           type="submit"
@@ -64,7 +107,7 @@ const GetTab = () => {
       </form>
 
       {result && (
-        <div className="p-4 bg-gray-700 rounded-lg border border-gray-600">
+        <div className="p-4 bg-gray-700 rounded-lg border border-gray-600 animate-fade-in">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-lg font-semibold text-white">Retrieved URL</h3>
             <button
@@ -97,4 +140,4 @@ const GetTab = () => {
   )
 }
 
-export default GetTab 
+export default GetTab

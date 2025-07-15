@@ -41,7 +41,7 @@ const createShortUrl = async (req, res) => {
       createdAt: newUrl.createdAt,
       updatedAt: newUrl.updatedAt
     });
-    console.log(newUrl, "newurl")
+
   } catch (error) {
     console.error('Error creating short URL:', error);
     res.status(500).json({ 
@@ -55,7 +55,6 @@ const getOriginalUrl = async (req, res) => {
   try {
     const { shortCode } = req.params;
 
-    // Find URL and increment access count
     const url = await Url.findOneAndUpdate(
       { shortCode },
       { $inc: { accessCount: 1 } },
@@ -68,6 +67,7 @@ const getOriginalUrl = async (req, res) => {
         details: 'The short code does not exist'
       });
     }
+    // return res.redirect(url.url);
 
     res.status(200).json({
       id: url._id,
