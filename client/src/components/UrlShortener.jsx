@@ -1,12 +1,44 @@
 import React, { useState } from 'react'
+import { urlService } from '../services/api'
+import { isValidUrl, buildShortUrl } from '../utils/helpers'
 
 const UrlShortener = () => {
   const [url, setUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('URL to shorten:', url)
+    setError('')
+    
+    if (!isValidUrl(url)) {
+      setError('Please enter a valid URL (starting with http:// or https://)')
+      return
+    }
+
+    setIsLoading(true)
+    
+    try {
+      const response = await urlService.shortenUrl(url)
+      setResult({
+        ...response,
+        shortUrl: buildShortUrl(response.shortCode)
+      })
+      setUrl('') 
+    } catch (error) {
+      setError(error.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  
+
+  const handleReset = () => {
+    setResult(null)
+    setError('')
+    setUrl('')
   }
 
   return (
@@ -21,7 +53,11 @@ const UrlShortener = () => {
               placeholder="Enter your URL here..."
               className="w-full px-6 py-4 bg-gray-700 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-lg"
               required
+              disabled={isLoading}
             />
+            {error && (
+              <p className="mt-2 text-red-400 text-sm">{error}</p>
+            )}
           </div>
 
           <button
@@ -42,6 +78,39 @@ const UrlShortener = () => {
             )}
           </button>
         </form>
+
+        {/* Result Display */}
+        {result && (
+          <div className="mt-8 p-6 bg-gray-700 rounded-xl border border-gray-600">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Your Short URL</h3>
+              <button
+                onClick={handleReset}
+                className="text-gray-400 hover:text-white text-sm"
+              >
+                Create another
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Original URL</label>
+                <p className="text-gray-300 text-sm break-all">{result.url}</p>
+              </div>
+              
+              <div>
+                <label className="block text-xs text-gray-400 mb-1">Short URL</label>
+                <div className="flex items-center space-x-2">
+                  <p className="text-primary-400 font-mono text-lg flex-1">{result.shortUrl}</p>
+                </div>
+              </div>
+              
+              <div className="pt-2 text-xs text-gray-500">
+                Created: {new Date(result.createdAt).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
