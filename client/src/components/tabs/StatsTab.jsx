@@ -30,80 +30,77 @@ const StatsTab = () => {
     }
   }
 
-  const handleReset = () => {
-    setResult(null)
-    setError('')
-    setShortCode('')
+  const formatNumber = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
+    return num.toString()
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            value={shortCode}
-            onChange={(e) => setShortCode(e.target.value)}
-            placeholder="Enter short code for stats"
-            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-            required
-            disabled={isLoading}
-          />
-          {error && (
-            <p className="mt-2 text-red-400 text-sm">{error}</p>
-          )}
-        </div>
+        <input
+          type="text"
+          value={shortCode}
+          onChange={(e) => setShortCode(e.target.value)}
+          placeholder="Short code for analytics..."
+          className="input-field"
+          required
+          disabled={isLoading}
+        />
+        
+        {error && (
+          <p className="text-red-400 text-sm">{error}</p>
+        )}
 
         <button
           type="submit"
           disabled={!shortCode || isLoading}
-          className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
+          className="btn-primary w-full disabled:opacity-50 bg-gradient-to-r from-purple-500 to-violet-600 hover:from-purple-600 hover:to-violet-700"
         >
-          {isLoading ? 'Getting Stats...' : 'Get Statistics'}
+          {isLoading ? 'Loading...' : 'Get Analytics'}
         </button>
       </form>
 
       {result && (
-        <div className="p-4 bg-gray-700 rounded-lg border border-gray-600">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-white">URL Statistics</h3>
+        <div className="glass rounded-xl p-4 border border-purple-500/20">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-purple-400 text-sm font-medium">📊 Analytics</span>
             <button
-              onClick={handleReset}
-              className="text-gray-400 hover:text-white text-sm"
+              onClick={() => setResult(null)}
+              className="text-neutral-400 hover:text-white text-sm"
             >
-              Clear
+              ×
             </button>
           </div>
+
+          {/* Main Stats */}
+          <div className="text-center mb-4 p-4 glass rounded-lg bg-gradient-to-br from-purple-500/10 to-violet-500/10">
+            <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+              {formatNumber(result.accessCount)}
+            </div>
+            <div className="text-xs text-neutral-400">Total Clicks</div>
+          </div>
           
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Original URL</label>
-              <p className="text-gray-300 text-sm break-all">{result.url}</p>
+          <div className="space-y-3">
+            <div className="p-3 glass rounded-lg">
+              <div className="text-xs text-neutral-400 mb-1">Original URL</div>
+              <div className="text-neutral-300 text-sm break-all">{result.url}</div>
             </div>
             
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Short Code</label>
-              <p className="text-purple-400 font-mono text-sm">{result.shortCode}</p>
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-2 glass rounded-lg text-center">
+                <div className="text-neutral-400">Created</div>
+                <div className="text-neutral-300">{new Date(result.createdAt).toLocaleDateString()}</div>
+              </div>
+              <div className="p-2 glass rounded-lg text-center">
+                <div className="text-neutral-400">Last Access</div>
+                <div className="text-neutral-300">{new Date(result.updatedAt).toLocaleDateString()}</div>
+              </div>
             </div>
 
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-300 mb-1">
-                  {result.accessCount}
-                </div>
-                <div className="text-sm text-gray-400">Total Clicks</div>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 text-xs text-gray-500">
-              <div>
-                <label className="block text-gray-400 mb-1">Created</label>
-                <div>{new Date(result.createdAt).toLocaleString()}</div>
-              </div>
-              <div>
-                <label className="block text-gray-400 mb-1">Last Accessed</label>
-                <div>{new Date(result.updatedAt).toLocaleString()}</div>
-              </div>
+            <div className="text-xs text-neutral-500 text-center">
+              Code: {result.shortCode} • Status: Active
             </div>
           </div>
         </div>

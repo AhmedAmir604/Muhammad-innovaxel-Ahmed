@@ -6,6 +6,7 @@ const DeleteTab = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -16,7 +17,12 @@ const DeleteTab = () => {
       return
     }
 
+    setShowConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
     setIsLoading(true)
+    setShowConfirm(false)
     
     try {
       await urlService.deleteUrl(shortCode.trim())
@@ -30,60 +36,78 @@ const DeleteTab = () => {
     }
   }
 
-  const handleReset = () => {
-    setResult(null)
-    setError('')
-    setShortCode('')
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <input
-            type="text"
-            value={shortCode}
-            onChange={(e) => setShortCode(e.target.value)}
-            placeholder="Enter short code to delete"
-            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
-            required
-            disabled={isLoading}
-          />
-          {error && (
-            <p className="mt-2 text-red-400 text-sm">{error}</p>
-          )}
+        <input
+          type="text"
+          value={shortCode}
+          onChange={(e) => setShortCode(e.target.value)}
+          placeholder="Short code to delete..."
+          className="input-field"
+          required
+          disabled={isLoading}
+        />
+        
+        {error && (
+          <p className="text-red-400 text-sm">{error}</p>
+        )}
+
+        <div className="glass rounded-lg p-3 border border-red-500/20">
+          <p className="text-xs text-neutral-400">
+            ⚠️ This action cannot be undone
+          </p>
         </div>
 
         <button
           type="submit"
           disabled={!shortCode || isLoading}
-          className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200"
+          className="btn-primary w-full disabled:opacity-50 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
         >
           {isLoading ? 'Deleting...' : 'Delete URL'}
         </button>
       </form>
 
+      {/* Confirmation Modal */}
+      {showConfirm && (
+        <div className="glass rounded-xl p-4 border border-red-500/30">
+          <div className="text-center space-y-3">
+            <h3 className="text-sm font-medium text-white">Confirm Deletion</h3>
+            <p className="text-xs text-neutral-400">
+              Delete short code <span className="text-red-400 font-mono">{shortCode}</span>?
+            </p>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="btn-secondary flex-1 text-sm py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="btn-primary flex-1 text-sm py-2 bg-gradient-to-r from-red-500 to-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {result && (
-        <div className="p-4 bg-gray-700 rounded-lg border border-gray-600">
+        <div className="glass rounded-xl p-4 border border-red-500/20">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-semibold text-white">URL Deleted</h3>
+            <span className="text-red-400 text-sm font-medium">✓ Deleted</span>
             <button
-              onClick={handleReset}
-              className="text-gray-400 hover:text-white text-sm"
+              onClick={() => setResult(null)}
+              className="text-neutral-400 hover:text-white text-sm"
             >
-              Clear
+              ×
             </button>
           </div>
           
-          <div className="space-y-3">
-            <div>
-              <label className="block text-xs text-gray-400 mb-1">Deleted Short Code</label>
-              <p className="text-red-400 font-mono text-sm">{result.shortCode}</p>
-            </div>
-            
-            <div className="pt-2 text-xs text-gray-500">
-              URL successfully deleted
-            </div>
+          <div className="text-xs text-neutral-500 text-center">
+            Code: {result.shortCode} • Permanently deleted
           </div>
         </div>
       )}
