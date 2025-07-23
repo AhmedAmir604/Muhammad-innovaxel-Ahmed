@@ -19,14 +19,16 @@ const DeleteTab = () => {
 
     setShowConfirm(true)
   }
+  
+  const code = shortCode.split("/").pop();
 
   const handleConfirmDelete = async () => {
     setIsLoading(true)
     setShowConfirm(false)
     
     try {
-      await urlService.deleteUrl(shortCode.trim())
-      setResult({ shortCode: shortCode.trim() })
+      await urlService.deleteUrl(code.trim())
+      setResult({ code: code.trim() })
       setShortCode('')
     } catch (error) {
       setError(error.message)

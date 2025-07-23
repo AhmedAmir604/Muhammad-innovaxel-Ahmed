@@ -22,11 +22,13 @@ const UpdateTab = () => {
       setError('Please enter a valid URL')
       return
     }
+    
+    const code = shortCode.split("/").pop();
 
     setIsLoading(true)
     
     try {
-      const response = await urlService.updateUrl(shortCode.trim(), url)
+      const response = await urlService.updateUrl(code.trim(), url)
       setResult(response)
       setShortCode('')
       setUrl('')

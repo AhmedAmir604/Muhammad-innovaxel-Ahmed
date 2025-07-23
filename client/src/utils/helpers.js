@@ -37,6 +37,8 @@ export const buildShortUrl = (shortCode, baseUrl = import.meta.env.VITE_MODE ===
 export const extractShortCode = (url) => {
   try {
     const urlObj = new URL(url)
+    console.log(urlObj);
+    console.log(urlObj.pathname.substring(1));
     return urlObj.pathname.substring(1) // Remove leading slash
   } catch {
     return null

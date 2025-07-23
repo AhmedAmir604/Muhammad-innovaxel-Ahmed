@@ -11,7 +11,7 @@ const api = axios.create({
 export const urlService = {
   shortenUrl: async (url) => {
     try {
-      console.log(import.meta.env.VITE_API_URL);
+      // console.log(`${import.meta.env.VITE_API_URL}/api`);
       const response = await api.post('/shorten', { url })
       return response.data
     } catch (error) {

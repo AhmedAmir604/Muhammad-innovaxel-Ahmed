@@ -16,10 +16,12 @@ const StatsTab = () => {
       return
     }
 
+    const code = shortCode.split("/").pop();
+
     setIsLoading(true)
     
     try {
-      const response = await urlService.getStats(shortCode.trim())
+      const response = await urlService.getStats(code.trim())
       setResult(response)
       setShortCode('')
     } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { urlService } from '../../services/api'
+// import { extractShortCode } from "../../utils/helpers.js";
 
 const GetTab = () => {
   const [shortCode, setShortCode] = useState('')
@@ -25,7 +26,8 @@ const GetTab = () => {
     }
 
     const code = shortCode.split("/").pop();
-
+    // const newCode = extractShortCode(shortCode);
+    // console.log(newCode);
     setShortCode(code);
 
     setIsLoading(true)
