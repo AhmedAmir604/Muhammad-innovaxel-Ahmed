@@ -29,7 +29,7 @@ export const formatDate = (dateString) => {
 
 
 // Build full short URL
-export const buildShortUrl = (shortCode, baseUrl = 'http://localhost:5000') => {
+export const buildShortUrl = (shortCode, baseUrl = import.meta.env.VITE_MODE === "production" ? import.meta.env.VITE_API_URL : 'http://localhost:5000') => {
   return `${baseUrl}/${shortCode}`
 }
 
