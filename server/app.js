@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const connectDB = require('./config/database');
 const urlRoutes = require('./routes/urlRoutes');
 const { errorHandler, notFound } = require('./middleware/errorHandler');
@@ -16,32 +17,24 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Serve static files from the React app build
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// API Routes
 app.use('/api', urlRoutes);
 
-// Basic route
-app.get('/', (req, res) => {
-  res.json({ 
-    message: 'URL Shortener API',
-    version: '1.0.0',
-    status: 'Running',
-    endpoints: {
-      'POST /api/shorten': 'Create short URL',
-      'GET /api/shorten/:shortCode': 'Get original URL',
-      'PUT /api/shorten/:shortCode': 'Update URL',
-      'DELETE /api/shorten/:shortCode': 'Delete URL',
-      'GET /api/shorten/statistics/:shortCode': 'Get URL statistics'
-    }
-  });
-});
-
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
+});
+
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // Error handling middleware
