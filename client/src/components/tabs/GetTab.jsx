@@ -24,10 +24,16 @@ const GetTab = () => {
       return
     }
 
+    const code = shortCode.split("/").pop();
+
+    setShortCode(code);
+
     setIsLoading(true)
     
     try {
-      const response = await urlService.getUrl(shortCode.trim())
+
+      const response = await urlService.getUrl(code.trim())
+      // console.log(response);
       setResult(response)
       setShortCode('')
     } catch (error) {

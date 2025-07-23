@@ -54,7 +54,6 @@ const createShortUrl = async (req, res) => {
 const getOriginalUrl = async (req, res) => {
   try {
     const { shortCode } = req.params;
-
     const url = await Url.findOneAndUpdate(
       { shortCode },
       { $inc: { accessCount: 1 } },
