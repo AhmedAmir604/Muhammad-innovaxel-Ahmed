@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: process.env.mode != "production" ? process.env.apiUrl : "http://localhost:5000/api",
+  baseURL: import.meta.env.VITE_MODE === "production" ? import.meta.env.VITE_API_URL : "http://localhost:5000/api",
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -11,6 +11,7 @@ const api = axios.create({
 export const urlService = {
   shortenUrl: async (url) => {
     try {
+      console.log(import.meta.env.VITE_API_URL);
       const response = await api.post('/shorten', { url })
       return response.data
     } catch (error) {
